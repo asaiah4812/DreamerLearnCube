@@ -1,13 +1,15 @@
-import NavBar from "@/components/navbar";
+import Features from "@/components/Features";
+import Hero from "@/components/Hero";
+import HowWeWork from "@/components/HowWeWork";
 
 export default function Home() {
   return (
-    <main className="h-screen overflow-hidden">
-      <NavBar />
-
-      <section className="h-full flex items-center justify-center text-2xl font-semibold px-4">
-        This app serves to demonstrate the usage of web3-react for wallet connection in dApps.
-      </section>
+    <main className="min-h-screen overflow-x-hidden">
+      <Hero/>
+      {/* Features Section */}
+      <Features/>
+      {/* How we work Page */}
+      <HowWeWork/>
     </main>
   );
 }
