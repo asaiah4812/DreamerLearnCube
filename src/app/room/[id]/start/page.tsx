@@ -118,7 +118,7 @@ export default function StartQuizPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white mb-4">Access Denied</h1>
-          <p className="text-gray-400 mb-8">You don't have permission to start this quiz.</p>
+          <p className="text-gray-400 mb-8">You don&apos;t have permission to start this quiz.</p>
           <Button
             onClick={() => router.push('/my-rooms')}
             className="bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-700 hover:to-sky-900 text-white"

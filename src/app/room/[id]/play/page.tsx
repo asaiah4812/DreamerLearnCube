@@ -1,9 +1,8 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useWeb3React } from '@web3-react/core'
 import { supabase } from '@/lib/supabase'
-import { Button } from '@/components/button'
 import { Award, Clock } from 'lucide-react'
 import { LoadingState } from '@/components/LoadingState'
 
@@ -35,13 +34,36 @@ export default function PlayQuizPage() {
   const [isQuizComplete, setIsQuizComplete] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  const handleNextQuestion = useCallback(async () => {
+    if (currentQuestionIndex + 1 < questions.length) {
+      setCurrentQuestionIndex(prev => prev + 1)
+      setSelectedOption(null)
+    } else {
+      setIsQuizComplete(true)
+      try {
+        await supabase
+          .from('participants')
+          .update({ 
+            score,
+            completed: true 
+          })
+          .eq('room_id', id)
+          .eq('wallet_address', account)
+
+        fetchLeaderboard()
+      } catch (error) {
+        console.error('Error:', error)
+      }
+    }
+  }, [currentQuestionIndex, questions.length, score, id, account])
+
   useEffect(() => {
     if (!account || !id) {
       router.push('/join')
       return
     }
     fetchQuestions()
-  }, [id, account])
+  }, [id, account, router])
 
   useEffect(() => {
     if (questions.length > 0 && !isQuizComplete) {
@@ -58,7 +80,7 @@ export default function PlayQuizPage() {
 
       return () => clearInterval(timer)
     }
-  }, [currentQuestionIndex, questions])
+  }, [currentQuestionIndex, questions, isQuizComplete, handleNextQuestion])
 
   const fetchQuestions = async () => {
     try {
@@ -96,29 +118,6 @@ export default function PlayQuizPage() {
     }
 
     setTimeout(handleNextQuestion, 1500)
-  }
-
-  const handleNextQuestion = async () => {
-    if (currentQuestionIndex + 1 < questions.length) {
-      setCurrentQuestionIndex(prev => prev + 1)
-      setSelectedOption(null)
-    } else {
-      setIsQuizComplete(true)
-      try {
-        await supabase
-          .from('participants')
-          .update({ 
-            score,
-            completed: true 
-          })
-          .eq('room_id', id)
-          .eq('wallet_address', account)
-
-        fetchLeaderboard()
-      } catch (error) {
-        console.error('Error:', error)
-      }
-    }
   }
 
   const [leaderboard, setLeaderboard] = useState<{ wallet_address: string, score: number }[]>([])

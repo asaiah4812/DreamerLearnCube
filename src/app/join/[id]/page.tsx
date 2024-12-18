@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useWeb3React } from '@web3-react/core'
 import { supabase } from '@/lib/supabase'
@@ -8,93 +8,94 @@ import { LoadingState } from '@/components/LoadingState'
 import { Users } from 'lucide-react'
 
 type Room = {
-  id: string
-  name: string
-  is_active: boolean
-}
-
-export default function JoinRoomPage() {
-  const { id } = useParams()
-  const { account } = useWeb3React()
-  const router = useRouter()
-  const [room, setRoom] = useState<Room | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [joining, setJoining] = useState(false)
-  const [participants, setParticipants] = useState<number>(0)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (!account) {
-      router.push('/join')
-      return
-    }
-    fetchRoomData()
-  }, [id, account])
-
-  const fetchRoomData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('rooms')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (error) throw error
-      setRoom(data)
-
-      // Get participant count
-      const { count } = await supabase
-        .from('participants')
-        .select('*', { count: 'exact' })
-        .eq('room_id', id)
-
-      setParticipants(count || 0)
-    } catch (error) {
-      console.error('Error:', error)
-      setError('Room not found')
-    } finally {
-      setLoading(false)
-    }
+    id: string
+    name: string
+    is_active: boolean
   }
-
-  const handleJoin = async () => {
-    if (!room || !account) return
-    setJoining(true)
-
-    try {
-      // Check if already joined
-      const { data: existing } = await supabase
-        .from('participants')
-        .select('*')
-        .eq('room_id', id)
-        .eq('wallet_address', account)
-        .single()
-
-      if (existing) {
-        router.push(`/room/${id}/play`)
+  
+  export default function JoinRoomPage() {
+    const { id } = useParams()
+    const { account } = useWeb3React()
+    const router = useRouter()
+    const [room, setRoom] = useState<Room | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [joining, setJoining] = useState(false)
+    const [participants, setParticipants] = useState<number>(0)
+    const [error, setError] = useState('')
+  
+    // Wrap fetchRoomData in useCallback
+    const fetchRoomData = useCallback(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('rooms')
+          .select('*')
+          .eq('id', id)
+          .single()
+  
+        if (error) throw error
+        setRoom(data)
+  
+        // Get participant count
+        const { count } = await supabase
+          .from('participants')
+          .select('*', { count: 'exact' })
+          .eq('room_id', id)
+  
+        setParticipants(count || 0)
+      } catch (error) {
+        console.error('Error:', error)
+        setError('Room not found')
+      } finally {
+        setLoading(false)
+      }
+    }, [id]) // Add id as a dependency
+  
+    useEffect(() => {
+      if (!account) {
+        router.push('/join')
         return
       }
-
-      // Join room
-      const { error } = await supabase
-        .from('participants')
-        .insert({
-          room_id: id,
-          wallet_address: account,
-          score: 0,
-          completed: false
-        })
-
-      if (error) throw error
-
-      router.push(`/room/${id}/play`)
-    } catch (error) {
-      console.error('Error:', error)
-      setError('Failed to join room')
-    } finally {
-      setJoining(false)
+      fetchRoomData()
+    }, [id, account, router, fetchRoomData]) // Now fetchRoomData is stable due to useCallback
+  
+    const handleJoin = async () => {
+      if (!room || !account) return
+      setJoining(true)
+  
+      try {
+        // Check if already joined
+        const { data: existing } = await supabase
+          .from('participants')
+          .select('*')
+          .eq('room_id', id)
+          .eq('wallet_address', account)
+          .single()
+  
+        if (existing) {
+          router.push(`/room/${id}/play`)
+          return
+        }
+  
+        // Join room
+        const { error } = await supabase
+          .from('participants')
+          .insert({
+            room_id: id,
+            wallet_address: account,
+            score: 0,
+            completed: false
+          })
+  
+        if (error) throw error
+  
+        router.push(`/room/${id}/play`)
+      } catch (error) {
+        console.error('Error:', error)
+        setError('Failed to join room')
+      } finally {
+        setJoining(false)
+      }
     }
-  }
 
   if (loading) {
     return <LoadingState message="Loading room details..." />
@@ -105,7 +106,7 @@ export default function JoinRoomPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white mb-4">Room Not Found</h1>
-          <p className="text-gray-400 mb-8">This room doesn't exist or has been deleted.</p>
+          <p className="text-gray-400 mb-8">This room doesn&apos;t exist or has been deleted.</p>
           <Button
             onClick={() => router.push('/join')}
             className="bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-700 hover:to-sky-900 text-white"

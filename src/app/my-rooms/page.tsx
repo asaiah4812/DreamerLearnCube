@@ -1,6 +1,6 @@
 "use client"
 import { useWeb3React } from '@web3-react/core'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { Button } from '@/components/button'
@@ -24,12 +24,11 @@ export default function MyRoomsPage() {
 
   useEffect(() => {
     if (account) {
-      console.log('Fetching rooms for account:', account)
       fetchRooms()
     }
   }, [account])
 
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('rooms')
@@ -48,7 +47,7 @@ export default function MyRoomsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [account])
 
   if (!account) {
     return (
