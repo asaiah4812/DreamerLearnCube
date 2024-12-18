@@ -59,10 +59,13 @@ const Navbar = () => {
         <button onClick={() => setShowSide(prev => !prev)} className='block lg:hidden text-white px-4 py-3'>
           <AlignJustify className='' />
         </button>
+        <div className="hidden lg:block">
         <WalletButton />
+
+        </div>
       </div>
       {showSide && (
-        <div className='fixed top-0 right-0 bg-black/80 min-h-screen flex flex-col w-[250px]'>
+        <div className='fixed z-40 px-5 py-3 top-0 right-0 bg-black/80 min-h-screen flex flex-col w-[250px]'>
           <button onClick={() => setShowSide(false)} className='block lg:hidden text-white px-4 py-3'>
             <CircleX />
           </button>

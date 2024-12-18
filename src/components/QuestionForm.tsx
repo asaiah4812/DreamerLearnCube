@@ -250,7 +250,7 @@ export const QuestionForm = ({ onSubmit, onCancel }: QuestionFormProps) => {
         >
           Cancel
         </Button>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             onClick={(e) => {
               e.preventDefault()
