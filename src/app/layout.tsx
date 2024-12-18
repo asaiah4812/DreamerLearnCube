@@ -5,7 +5,7 @@ import RecoidContextProvider from "@/providers/recoilContextProvider";
 import Web3ContextProvider from "@/providers/web3ReactProvider";
 import Navbar from "@/components/navbar";
 
-const dreamer = Poppins({
+const poppins = Poppins({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
   subsets: ["latin"],
 });
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={dreamer.className}>
+      <body className={poppins.className}>
         <RecoidContextProvider>
           <Web3ContextProvider>
           <main className="min-h-screen"
