@@ -52,7 +52,10 @@ const Hero = () => {
             </Button>
           </div>
         </div>
+        <div className='min-h-[40vh]'>
         <Luke/>
+
+        </div>
       </div>
     </>
   )
